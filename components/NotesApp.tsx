@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { ensureSignedInWithFabric } from '@microsoft/rayfin-auth-provider-fabric';
-import { getBrowserClient, fabricOptions, isConfigured } from '../lib/rayfinBrowser';
+import { getBrowserClient, fabricOptions } from '../lib/rayfinBrowser';
+import type { RayfinConfig } from '../lib/serverConfig';
 
 type Note = {
   id: string;
@@ -11,7 +12,7 @@ type Note = {
   createdAt: string | Date;
 };
 
-export default function NotesApp() {
+export default function NotesApp({ config }: { config: RayfinConfig | null }) {
   const [ready, setReady] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [user, setUser] = useState<string | null>(null);
@@ -20,25 +21,24 @@ export default function NotesApp() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const configured = isConfigured();
-
   const refresh = useCallback(async () => {
-    const client = getBrowserClient();
+    if (!config) return;
+    const client = getBrowserClient(config);
     const rows = await client.data.Note.select(['id', 'author', 'message', 'createdAt'])
       .orderBy({ createdAt: 'desc' })
       .execute();
     setNotes(rows as Note[]);
-  }, []);
+  }, [config]);
 
   // On load, restore any existing session (no UI) and load notes if signed in.
   useEffect(() => {
-    if (!configured) {
+    if (!config) {
       setReady(true);
       return;
     }
     (async () => {
       try {
-        const client = getBrowserClient();
+        const client = getBrowserClient(config);
         const session = client.auth.getSession();
         if (session.isAuthenticated && session.user) {
           setSignedIn(true);
@@ -51,15 +51,16 @@ export default function NotesApp() {
         setReady(true);
       }
     })();
-  }, [configured, refresh]);
+  }, [config, refresh]);
 
   const signIn = useCallback(async () => {
+    if (!config) return;
     setError(null);
     setBusy(true);
     try {
-      const client = getBrowserClient();
+      const client = getBrowserClient(config);
       const session = await ensureSignedInWithFabric(client.auth, {
-        ...fabricOptions(),
+        ...fabricOptions(config),
         returnOrigin: window.location.origin,
       });
       if (!session.isAuthenticated || !session.user) {
@@ -73,17 +74,18 @@ export default function NotesApp() {
     } finally {
       setBusy(false);
     }
-  }, [refresh]);
+  }, [config, refresh]);
 
   const addNote = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (!config) return;
       const text = message.trim();
       if (!text) return;
       setBusy(true);
       setError(null);
       try {
-        const client = getBrowserClient();
+        const client = getBrowserClient(config);
         const session = client.auth.getSession();
         const author = session.user?.email ?? session.user?.id ?? 'unknown';
         await client.data.Note.create({
@@ -99,16 +101,17 @@ export default function NotesApp() {
         setBusy(false);
       }
     },
-    [message, refresh]
+    [config, message, refresh]
   );
 
-  if (!configured) {
+  if (!config) {
     return (
       <p className="warn">
-        Backend not configured. Set <code>NEXT_PUBLIC_RAYFIN_API_URL</code>,{' '}
-        <code>NEXT_PUBLIC_RAYFIN_PUBLISHABLE_KEY</code>,{' '}
-        <code>NEXT_PUBLIC_FABRIC_WORKSPACE_ID</code>, and{' '}
-        <code>NEXT_PUBLIC_FABRIC_ITEM_ID</code> after running <code>rayfin up</code>.
+        Backend not configured. Set <code>RAYFIN_API_URL</code>,{' '}
+        <code>RAYFIN_PUBLISHABLE_KEY</code>, <code>FABRIC_WORKSPACE_ID</code>, and{' '}
+        <code>FABRIC_ITEM_ID</code> (via <code>embr variables set</code> on Embr, or
+        the <code>NEXT_PUBLIC_*</code> equivalents in <code>.env.local</code> for
+        local dev) after running <code>rayfin up</code>.
       </p>
     );
   }
