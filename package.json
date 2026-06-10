@@ -1,0 +1,29 @@
+{
+  "name": "embr-sample-rayfin-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "rayfin:up": "rayfin up --exclude-services staticHosting"
+  },
+  "dependencies": {
+    "@microsoft/rayfin-auth-provider-fabric": "^1.33.1",
+    "@microsoft/rayfin-client": "^1.33.1",
+    "@microsoft/rayfin-core": "^1.33.1",
+    "@microsoft/rayfin-data": "^1.33.1",
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@microsoft/rayfin-cli": "^1.33.1",
+    "@types/node": "^20.14.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.5.0"
+  }
+}

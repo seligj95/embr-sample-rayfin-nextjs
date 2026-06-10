@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+next-env.d.ts
+
+# rayfin
+rayfin/.temp/
+rayfin/.env
+rayfin/.lockfile.json
+
+# env / secrets
+.env
+.env.local
+.env*.local
+
+# os / editor
+.DS_Store
+*.log
+
+# rayfin deployment metadata (contains publishable key + backend IDs)
+rayfin/.deployments.json

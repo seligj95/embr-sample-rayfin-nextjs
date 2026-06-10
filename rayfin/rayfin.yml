@@ -1,0 +1,21 @@
+id: embr-sample-rayfin-nextjs
+name: embr-sample-rayfin-nextjs
+version: 1.0.0
+services:
+  # Rayfin requires the Auth service to be enabled even though this sample's
+  # data entity is @anonymous (the BFF reads/writes with just the publishable
+  # key and does not perform interactive sign-in in v1).
+  auth:
+    enabled: true
+    fabric:
+      enabled: true
+    allowedRedirectUris:
+      - http://localhost:3000
+  data:
+    enabled: true
+    dialect: mssql
+  # The frontend is a Next.js server app hosted on Embr, NOT Rayfin static
+  # hosting. Disable Rayfin's static hosting so `rayfin up` only provisions
+  # the backend (database + data API).
+  staticHosting:
+    enabled: false
