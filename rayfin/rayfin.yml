@@ -2,15 +2,17 @@ id: embr-sample-rayfin-nextjs
 name: embr-sample-rayfin-nextjs
 version: 1.0.0
 services:
-  # Rayfin requires the Auth service to be enabled even though this sample's
-  # data entity is @anonymous (the BFF reads/writes with just the publishable
-  # key and does not perform interactive sign-in in v1).
+  # Auth must be enabled on Fabric-managed Rayfin even for data-only use.
+  # Sign-in is interactive (browser Fabric flow); allowedRedirectUris must
+  # include every origin the app is served from.
   auth:
     enabled: true
     fabric:
       enabled: true
     allowedRedirectUris:
       - http://localhost:3000
+      - https://production-embr-sample-rayfin-nextjs-df4b5a64.app.embr.azure
+      - https://production-embr-sample-rayfin-nextjs-df4b5a64.app.embr.azure/
   data:
     enabled: true
     dialect: mssql
