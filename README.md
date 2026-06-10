@@ -115,7 +115,19 @@ access, a true BFF integration becomes possible.
 
 ## Verified vs. needs-a-human
 - ✅ Builds (`npm run build`), runs, `/api/health` returns 200, SSR shell renders.
+- ✅ Deployed on Embr; the page hydrates to the "Sign in with Fabric" state with
+  the Rayfin config delivered to the client (verified in a browser).
 - ✅ Backend is real: the Data API rejects unauthenticated calls (401), proving
   the wiring and the auth model.
 - 👤 The interactive **Fabric sign-in + data round-trip** requires a human to
   complete the browser consent flow; it is not automated here.
+
+## Gotcha: config must be runtime, not `NEXT_PUBLIC_*`
+
+Embr injects environment variables at **runtime**, but Next.js inlines
+`NEXT_PUBLIC_*` at **build time**. If you rely on `NEXT_PUBLIC_*`, the client
+bundle ships empty and the app reports "Backend not configured" even though the
+server has the values. This sample therefore reads config in a **server
+component at runtime** (`lib/serverConfig.ts`) and passes it to the client as
+props. Set the plain `RAYFIN_*` / `FABRIC_*` variables on Embr (the
+`NEXT_PUBLIC_*` names still work for local dev via `.env.local`).
